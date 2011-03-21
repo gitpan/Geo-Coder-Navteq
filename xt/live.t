@@ -5,19 +5,12 @@ use Geo::Coder::Navteq;
 use LWP::UserAgent;
 use Test::More;
 
-use Data::Dump qw(dump);
-
-unless ($ENV{NAVTEQ_APPKEY}) {
-    plan skip_all => 'NAVTEQ_APPKEY environment variable must be set';
-}
-else {
-    plan tests => 8;
-}
+plan skip_all => 'NAVTEQ_APPKEY environment variable must be set'
+    unless $ENV{NAVTEQ_APPKEY};
 
 my $debug = $ENV{GEO_CODER_NAVTEQ_DEBUG};
-unless ($debug) {
-    diag "Set GEO_CODER_NAVTEQ_DEBUG to see request/response data";
-}
+diag "Set GEO_CODER_NAVTEQ_DEBUG to see request/response data"
+    unless $debug;
 
 my $geocoder = Geo::Coder::Navteq->new(
     appkey => $ENV{NAVTEQ_APPKEY},
@@ -33,8 +26,8 @@ my $geocoder = Geo::Coder::Navteq->new(
     );
 }
 {
-    my @locations = $geocoder->geocode('Main Street');
-    ok(@locations > 1, 'there are many Main Streets');
+    my @locations = $geocoder->geocode('Main Street, Los Angeles, CA');
+    ok(@locations > 1, 'there are many Main Streets in Los Angeles');
 }
 {
     my $address = qq(Albrecht-Th\xE4r-Stra\xDFe 6, 48147 M\xFCnster, Germany);
@@ -53,3 +46,5 @@ my $geocoder = Geo::Coder::Navteq->new(
     ok($location, 'UTF-8 bytes');
     is($location->{PropertiesMajor}{Ctry}, 'DE', 'UTF-8 bytes');
 }
+
+done_testing;

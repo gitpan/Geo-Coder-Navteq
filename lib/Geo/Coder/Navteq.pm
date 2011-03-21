@@ -3,13 +3,13 @@ package Geo::Coder::Navteq;
 use strict;
 use warnings;
 
-use Carp qw(carp croak);
+use Carp qw(croak);
 use Encode ();
 use LWP::UserAgent;
 use URI;
 use XML::Simple ();
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 $VERSION = eval $VERSION;
 
 sub new {
@@ -32,10 +32,9 @@ sub new {
         $self->ua->set_my_handler(request_send  => $dump_sub);
         $self->ua->set_my_handler(response_done => $dump_sub);
     }
-
-    $self->{compress} = 1 unless exists $self->{compress};
-    $self->ua->default_header(accept_encoding => 'gzip,deflate')
-        if $self->{compress};
+    elsif ($self->{compress}) {
+        $self->ua->default_header(accept_encoding => 'gzip,deflate');
+    }
 
     # Each appkey has this url aautomatically added on registration.
     $self->{url} ||= 'http://localhost';
@@ -150,6 +149,8 @@ sub _authenticate {
     return unless $data->{'soapenv:Body'}{'tns:getMap24ApplicationResponse'}
         ->{GetMap24ApplicationResponse};
 
+    $self->{auth_time} = time;
+
     return 1;
 }
 
@@ -252,6 +253,7 @@ sub _bdom {
         unless ($end) {
             $s[-1] = $encode_table[ $decode_table{$s[-1]} | 15 ];
         }
+
         return join '', @s;
     }
 }
@@ -362,11 +364,11 @@ Accessor for the UserAgent object.
 
 =head1 SEE ALSO
 
-L<http://msdn.microsoft.com/en-us/library/ff701713.aspx>
+L<http://www.nn4d.com/site/global/build/manuals/ajaxapiintroduction.jsp>
 
 L<Geo::Coder::Bing>, L<Geo::Coder::Bing::Bulk>, L<Geo::Coder::Google>,
 L<Geo::Coder::Mapquest>, L<Geo::Coder::Multimap>, L<Geo::Coder::OSM>,
-L<Geo::Coder::TomTom>, L<Geo::Coder::Yahoo>
+L<Geo::Coder::PlaceFinder>, L<Geo::Coder::TomTom>, L<Geo::Coder::Yahoo>
 
 =head1 REQUESTS AND BUGS
 
@@ -403,7 +405,7 @@ L<http://rt.cpan.org/Public/Dist/Display.html?Name=Geo-Coder-Navteq>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Geo-Coder-Navteq>
+L<http://search.cpan.org/dist/Geo-Coder-Navteq/>
 
 =back
 
